@@ -1,0 +1,62 @@
+version: "3"
+
+services:
+
+  redis:
+    image: redis
+    container_name: redis6379
+    restart: always
+    volumes:
+      - /pingxuan/data/redis/:/data
+    command: redis-server --appendonly yes --requirepass "video"
+    networks:
+      video:
+        ipv4_address: 172.19.0.254
+
+  video-discovery:
+    image: pingxuan/video-discovery:1
+    container_name: video-discovery-container
+    restart: always
+    environment:
+      - ACTIVE=docker-discovery
+    ports:
+      - 8761:8761
+    networks:
+      - video
+
+  video-gateway:
+    image: pingxuan/video-gateway:1
+    container_name: video-gateway-container
+    restart: always
+    environment:
+      - ACTIVE=docker-gateway
+    ports:
+      - 8800:8800
+    networks:
+      - video
+
+  video-auth:
+    image: pingxuan/video-auth:1
+    container_name: video-auth-container
+    restart: always
+    environment:
+      - ACTIVE=docker-auth
+#    ports:
+#      - 8000:8000
+    networks:
+      - video
+
+  video-user:
+    image: pingxuan/video-user:1
+    container_name: video-user-container
+    restart: always
+    environment:
+      - ACTIVE=docker-user
+    ports:
+      - 8100:8100
+    networks:
+      - video
+
+networks:
+  video:
+    external: true
